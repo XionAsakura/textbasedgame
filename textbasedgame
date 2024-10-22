@@ -92,8 +92,8 @@ def move_rooms(current_room, cardinal_direction):
                 else:
                     print('An invisible wall blocks your way... Enter another direction')
             # Else for input that is not a valid input
-            else:
-                print('Invalid input!')
+        else:
+            print('Invalid input!')
 
 def pickup(current_room, item_name):
     if 'item' in rooms[current_room] and rooms[current_room]['item'] == item_name:
