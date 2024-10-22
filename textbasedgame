@@ -1,0 +1,136 @@
+# Ruben Rodriguez
+# IT 140
+
+# The dictionary links a room to other rooms.
+
+rooms = dict()
+inventory = []
+max_items_required = 6
+
+def status_window(current_room):
+    print(f'Current Room: {current_room}')
+    if 'item' in rooms[current_room]:
+        print(f'Item: {rooms[current_room]["item"]}')
+    else:
+        print('There appears to be no items here')
+    print('Inventory:', ', '.join(inventory) if inventory else 'Empty')
+    print('Commands (case sensitive): go North, go West, go South, go East, exit, pick up "item"')
+    print('-----------------\n')
+
+# main function depicting instructions and a call to start the game
+def main():
+    current_room = 'Kokiri Forest'
+    cardinal_direction = ['North', 'South', 'East', 'West']
+    print('Link wakes up from his bed in Kokiri Forest.')
+    print('On his table he sees "HELP!" with a picture of Zelda being held by Ganon.')
+    print('Save Zelda, Link!')
+
+    rooms.update({'Kokiri Forest': {'South': 'Lost Woods', 'North': 'Hyrule Field', 'East': 'Gerudo Valley', 'West': 'Lake Hylia'},
+    'Lake Hylia': {'North': 'Temple of Wisdom', 'East': 'Kokiri Forest'},
+    'Temple of Wisdom': {'South': 'Lake Hylia', 'item': 'Triforce of Wisdom'},
+    'Lost Woods': {'North': 'Kokiri Forest', 'South': 'Temple of Courage'},
+    'Temple of Courage': {'North': 'Lost Woods', 'item': 'Triforce of Courage'},
+    'Gerudo Valley': {'West': 'Kokiri Forest', 'East': 'Temple of Power'},
+    'Temple of Power': {'West': 'Gerudo Valley', 'item': 'Triforce of Power'},
+    'Hyrule Field': {'South': 'Kokiri Forest', 'East': 'Death Valley', 'North': 'Hyrule Castle'},
+    'Death Valley': {'West': 'Hyrule Field', 'item': 'Hammer'},
+    'Hyrule Castle': {'South': 'Hyrule Field', 'North': 'Top of Hyrule Castle', 'East': 'Castle Basement',
+                      'West': 'Kitchen', 'item': 'Hylian Shield'},
+    'Kitchen': {'East': 'Hyrule Castle'},  # Figure out easter egg
+    'Castle Basement': {'West': 'Hyrule Castle', 'item': 'Master Sword'},
+    'Top of Hyrule Castle': {'South': 'Hyrule Castle', 'item': 'Ganon'} }) #Ganon is the Villain in Top of Hyrule
+
+    move_rooms(current_room, cardinal_direction)
+
+
+# The game as well as the move between rooms function
+def move_rooms(current_room, cardinal_direction):
+    # Start game loop
+    while True:
+        status_window(current_room)
+        command = input('Enter a command or type exit to quit: ')
+
+        # Exit room conditional
+        if command == 'exit':
+            # Last room created to keep track of what room was prior to 'exit' room
+            last_room = current_room
+            current_room = 'exit'
+            print(f'You are at the {current_room}')
+            command = input('Would you like to leave? (Yes or No): ')
+
+            # Loop to reprompt whether you would like to leave or not, accounting for invalid commands
+            while command not in ['Yes', 'No']:
+                print('Invalid input')
+                command = input('Would you like to leave? (Yes or No): ')
+            if command == 'Yes':
+                break
+            elif command == 'No':
+                current_room = last_room
+                continue
+
+        #pick up items
+        elif command.startswith('pick up '):
+            item_name = command[len('pick up '):]
+            pickup(current_room, item_name)
+
+        # Move from one room to another based off direction input
+        elif command.startswith('go '):
+            direction = command[len('go '):]
+            if direction in cardinal_direction:
+                # Check dictionary to see if there is a room assigned to direction input based on the current room
+                if direction in rooms[current_room]:
+                    current_room = rooms[current_room][direction]
+                # Check if player enters 'Kitchen'
+                    if current_room == 'Kitchen':
+                        print('A single Cucco stands before you, menacingly...')
+                        print('There is nowhere else to go but back where I came from.')
+                # Check if player enters room with Ganon
+                    elif 'item' in rooms[current_room] and rooms[current_room]['item'] == 'Ganon':
+                        win_or_lose()
+                        break
+            # Else for there not being a room assigned to the direction given
+                else:
+                    print('An invisible wall blocks your way... Enter another direction')
+            # Else for input that is not a valid input
+            else:
+                print('Invalid input!')
+
+def pickup(current_room, item_name):
+    if 'item' in rooms[current_room] and rooms[current_room]['item'] == item_name:
+        inventory.append(item_name)
+        print(f'{item_name} has been added to your inventory.')
+
+        #remove item from dictionary
+        del rooms[current_room]['item']
+
+        if len(inventory) == max_items_required:
+            print('You are now ready to face Ganon! Head to the top of Hyrule Castle!')
+    else:
+        print(f'There is no {item_name} here to pick up.')
+
+def win_or_lose():
+    if len(inventory) == max_items_required:
+        print('\nYou have everything you need. Ganon appears before you; here, at the top of Hyrule Castle.')
+        print('Ganon, although powerful, is slain after an intense fight.')
+        print('Link has saved Zelda and the land of Hyrule.\n')
+        restart()
+    else:
+        print('\nYou have entered the top of Hyrule Castle and feel a sinister force.')
+        print('Your inventory feels lighter than it should be, perhaps this was a mistake.')
+        print('Before you get a chance to leave, Ganon pierces you suddenly with his massive claws.')
+        print('It appears this is the end of our hero.\n')
+        restart()
+
+def restart():
+    command = input('Would you like to play again? (Yes or No) ')
+    while command not in ['Yes', 'No']:
+        print('Invalid input')
+        command = input('Would you like to play again? (Yes or No) ')
+    if command == 'Yes':
+        inventory.clear()
+        main()
+    else:
+        print('You have exited the game.')
+        exit()
+main()
+print('You have exited the game.')
